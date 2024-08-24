@@ -1,0 +1,40 @@
+---
+version: "3.8"
+services:
+  dashy:
+    # To build from source, replace 'image: lissy93/dashy' with 'build: .'
+    # build: .
+    image: lissy93/dashy
+    container_name: dashy
+    mac_address: 00:12:90:90:19:10          # <-- Update
+    cap_add:
+      - NET_ADMIN
+    networks:
+      pub_net:                      # <-- MACVlan Name no need to change, but do not exist previosly.
+        ipv4_address: 192.168.5.41       # <-- Update
+    # Pass in your config file below, by specifying the path on your host machine
+    volumes:
+      - /docker/dashy/dashy_conf.yml:/app/user-data/conf.yml  #<-- update destination
+      #- /docker/dashy:/app/user-data
+      - /docker/dashy/item-icons:/app/user-data/item-icons/
+    ports:
+      - 4000:8080
+    # Set any environmental variables
+    environment:
+      - NODE_ENV=production
+    # Specify your user ID and group ID. You can find this by running `id -u` and `id -g`
+    #  - UID=1000
+    #  - GID=1000
+    # Specify restart policy
+    restart: unless-stopped
+    # Configure healthchecks
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  pub_net:
+    external: true
